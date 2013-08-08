@@ -1,0 +1,7 @@
+personal notes
+--------------------------
+
+set initial state of children to collapsed via code. so jquery height() should not make problems anymore. remove css hack of menu
+
+
+jquery cookie should also be used via libraries

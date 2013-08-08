@@ -1,0 +1,126 @@
+/**
+* Add to cart popin.
+*/
+/* Overlay */
+div.commerce_add_to_cart_confirmation_overlay {
+  background: transparent url('../images/bg_add_to_cart_overlay.png') left top;
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 200;
+}
+
+div.messages.commerce-add-to-cart-confirmation {
+  background-color: white;
+  -moz-box-shadow: 0 2px 15px #57595a;
+  -webkit-box-shadow: 0 2px 15px #57595a;
+  box-shadow: 0 2px 15px #57595a;
+  filter: progid:DXImageTransform.Microsoft.Shadow(color='#57595A', direction='180', strength='5');
+  left: 50%;
+  margin-left: -20% !important; /* width/2 */
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 450px;
+  z-index: 201;
+}
+/* Close button */
+div.messages.commerce-add-to-cart-confirmation .message-inner .commerce-add-to-cart-confirmation-close {
+  background: url('../images/btn_add-to-cart-close.png') no-repeat 0 0;
+  display: block;
+  height: 17px;
+  position: absolute;
+  right: 15px; /* LTR */
+  top: 15px;
+  width: 18px;
+}
+/* Title */
+div.messages.commerce-add-to-cart-confirmation .message-inner .added-product-title {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 10px 30px 20px 20px;
+  text-align: center;
+}
+
+/* Button */
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper {
+  padding: 40px 25px 25px;
+}
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper:after {
+  clear: both;
+  content: ".";
+  display: block;
+  height: 0;
+  visibility: hidden;
+}
+
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button.checkout {
+  float:right;
+}
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button.continue {
+  line-height:30px;
+}
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button.continue .commerce-add-to-cart-confirmation-close {
+  background: none;
+  height: auto;
+  position: static;
+  width: auto;
+}
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button.checkout:hover,
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button.continue:hover {
+  cursor: pointer;
+}
+div.messages.commerce-add-to-cart-confirmation .message-inner .button-wrapper .button a {
+
+}
+
+/* Product display */
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display {
+  clear: both;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content {
+  padding: 25px;
+  position: relative;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .content .field-name-field-images {
+  position: relative;
+  width: 130px;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .content .field-name-field-images img {
+  border: #d7d7d7 solid 1px;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .commerce-product-sku .commerce-product-sku-label,
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .field .views-label,
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .field .field-label {
+  font-size: 12px;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .field {
+  font-size:14px;
+  margin: 0;
+  float:right;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .field .field-label {
+  display: inline;
+  float: left; /* LTR */
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .views-field-commerce-total {
+  clear: both;
+  font-size: 14px;
+  margin-top: 80px;
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .views-field-commerce-total .views-label {
+  float: left; /* LTR */
+  padding-right: 5px; /* LTR */
+}
+div.messages.commerce-add-to-cart-confirmation .view-confirm-message-product-display .view-content .views-field-commerce-total .field-content {
+  color: #8DC63F;
+  float: right; /* LTR */
+}
+
+
+.views-field-field-product-photos { float:left; }
+.views-field-commerce-product { font-size:14px; margin-left:103px; }
+
+

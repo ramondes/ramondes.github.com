@@ -1,0 +1,104 @@
+<?php
+
+/**
+ * @file
+ * ipgeo functions.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function ipgeo_menu() {
+  // Module settings.
+  $items['admin/config/development/ipgeo'] = array(
+    'title' => 'Геолокация',
+    'description' => 'Определение региона пользователя по IP адресу',
+    'page callback' => 'ipgeo_admin_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'ipgeo.admin.inc',
+  );
+  $items['admin/config/development/ipgeo/debug'] = array(
+    'title' => 'Геолокация',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/development/ipgeo/import'] = array(
+    'title' => 'Импорт',
+    'description' => 'Импорт блоков IP адресов',
+    'page callback' => 'ipgeo_import_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'ipgeo.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Get region form IP.
+ *
+ * @param $ip
+ *   IP address.
+ * @param $reset
+ *   Whether to reset the region cache.
+ * @return
+ *   A fully-populated region object.
+ */
+function ipgeo_get_region($ip = FALSE, $reset = FALSE) {
+  $ip = $ip ? $ip : ip_address();
+  if (!ipgeo_ip_validate($ip)) {
+    watchdog('ipgeo', 'Не корректный IP адрес');
+    return FALSE;
+  }
+  if (empty($_SESSION['ipgeo_region'][$ip]) || $reset) {
+    $function = 'ipgeo_load_region_from_' . variable_get('ipgeo_data_source', 'database');
+    $_SESSION['ipgeo_region'][$ip] = $function($ip);
+  }
+  return $_SESSION['ipgeo_region'][$ip];
+}
+
+/**
+ *  Load region form database.
+ */
+function ipgeo_load_region_from_database($ip) {
+  $long_ip = sprintf('%u', ip2long($ip));
+  // TODO Explain this query.
+  $query = db_select('ipgeo_blocks', 'ipb')
+    ->fields('ipb', array('country'))
+    ->fields('ipr', array('rid', 'city', 'subject', 'fo'))
+    ->condition('begin', $long_ip, '<=')
+    ->condition('end', $long_ip, '>=')
+    ->orderBy('begin', 'DESC')
+    ->range(0, 1);
+  $query->leftJoin('ipgeo_regions', 'ipr', 'ipb.rid = ipr.rid');
+  return $query->execute()->fetch();
+}
+
+/**
+ * Load region from xml.
+ */
+function ipgeo_load_region_from_xml($ip) {
+  $url = 'http://ipgeobase.ru:7020/geo?ip=' . $ip;
+
+  // simplexml_load_file($url) doesn't work with allow_url_fopen = Off.
+  $result = drupal_http_request($url);
+  if($result->code < 300 && $xml = @simplexml_load_string($result->data)) {
+    return (object) array(
+      'country'   => (string)$xml->ip->country,
+      'city'      => (string)$xml->ip->city,
+      'subject'   => (string)$xml->ip->region,
+      'fo'        => (string)$xml->ip->district,
+      'latitude'  => (string)$xml->ip->lat,
+      'longitude' => (string)$xml->ip->lng,
+    );
+  }
+  else {
+    watchdog('ipgeo', 'Не удалось загрузить данные с ipgeobase.ru');
+    return FALSE;
+  }
+}
+
+/**
+ * Validate IP.
+ */
+function ipgeo_ip_validate($ip) {
+  return filter_var($ip, FILTER_VALIDATE_IP);
+}

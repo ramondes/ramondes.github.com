@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>http://textile/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+<url><loc>http://textile/kontakty</loc></url>
+<url><loc>http://textile/oplata-ta-dostavka</loc></url>
+<url><loc>http://textile/novini</loc></url>
+<url><loc>http://textile/rushniki</loc></url>
+<url><loc>http://textile/kuhonni</loc></url>
+<url><loc>http://textile/banni</loc></url>
+<url><loc>http://textile/dlya-ruk</loc></url>
+<url><loc>http://textile/dlya-nig</loc></url>
+<url><loc>http://textile/postil</loc></url>
+<url><loc>http://textile/halati</loc></url>
+<url><loc>http://textile/fartuhi</loc></url>
+<url><loc>http://textile/servetki</loc></url>
+<url><loc>http://textile/podarunkovi-upakovki</loc></url>
+<url><loc>http://textile/statya/shkafy-kupe</loc><lastmod>2013-07-16T16:06Z</lastmod><changefreq>monthly</changefreq></url>
+<url><loc>http://textile/statya/korpusnaya-mebel</loc><lastmod>2013-07-16T16:05Z</lastmod><changefreq>monthly</changefreq></url>
+<url><loc>http://textile/statya/dvuspalnye-krovati</loc><lastmod>2013-07-16T16:04Z</lastmod><changefreq>monthly</changefreq></url>
+<url><loc>http://textile/statya/fotografiya-na-holste</loc><lastmod>2013-07-16T16:03Z</lastmod><changefreq>monthly</changefreq></url>
+<url><loc>http://textile/statya/svetilniki</loc><lastmod>2013-07-16T16:05Z</lastmod><changefreq>monthly</changefreq></url>
+<url><loc>http://textile/novost/mauris-eget-felis-diam-curabitur-odio-lectus-suscipit-id-ultrices-vel-luctus-sed-augue</loc><lastmod>2013-07-26T09:25Z</lastmod><changefreq>weekly</changefreq></url>
+<url><loc>http://textile/novost/proin-lorem-nibh-elementum-eu-bibendum-fermentum-et-lorem</loc><lastmod>2013-07-26T09:26Z</lastmod><changefreq>weekly</changefreq></url>
+<url><loc>http://textile/novost/proin-lacinia-orci-ut-elementum-sagittis-maecenas-pharetra-nisl-feugiat</loc><lastmod>2013-07-26T09:27Z</lastmod><changefreq>weekly</changefreq></url>
+<url><loc>http://textile/novost/cras-vulputate-mi-id-pretium-accumsan</loc><lastmod>2013-07-26T09:28Z</lastmod><changefreq>weekly</changefreq></url>
+<url><loc>http://textile/postil/rushniki</loc><lastmod>2013-07-30T09:39Z</lastmod><changefreq>daily</changefreq></url>
+<url><loc>http://textile/postil/podushki</loc><lastmod>2013-07-30T09:39Z</lastmod><changefreq>daily</changefreq></url>
+<url><loc>http://textile/postil/podushki-dekorativni</loc><lastmod>2013-07-30T06:56Z</lastmod><changefreq>daily</changefreq></url>
+<url><loc>http://textile/postil/podushki-pirya</loc><lastmod>2013-07-30T07:04Z</lastmod><changefreq>daily</changefreq></url>
+<url><loc>http://textile/rushniki-dlya-ruk/rushniki-dlya-ruk</loc><lastmod>2013-07-30T07:06Z</lastmod><changefreq>daily</changefreq></url>
+</urlset>

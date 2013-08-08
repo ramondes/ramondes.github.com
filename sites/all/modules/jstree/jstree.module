@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * implementation of hook_init()
+ *
+ * Adds Javascript and settings to the page
+ */
+
+function jstree_init() {
+  $path = drupal_get_path('module', 'jstree');
+  drupal_add_js($path . '/jstree.settings.js');
+
+  //is a custom jstree.js used?
+  $custom_script = variable_get('jstree_custom_script', '');
+
+  if($custom_script == '') {
+    //add jstree with the library api
+    $path = libraries_get_path('jstree');
+    drupal_add_js($path . '/jquery.jstree.js');
+  } else {
+    drupal_add_js($custom_script);
+  }
+
+  drupal_add_js($path . '/_lib/jquery.cookie.js');
+
+  //SETTINGS
+  $css_ids = explode("\n", variable_get('jstree_forms_ids', '#primary-menu-bar nav'));
+  $css_ids = array_filter(array_map('trim', $css_ids));
+
+  $custom_theme_path = variable_get('jstree_custom_theme_path', '');
+  $custom_theme_name = variable_get('jstree_custom_theme_name', '');
+
+  $theme_type = variable_get('jstree_theme_select', 'default');
+
+
+  $script_themes = variable_get('jstree_script_themes', 'classic');
+
+
+  //push settings to the js.
+  drupal_add_js(array(
+    'jstreeMenus'           => $css_ids,
+    'jstreeCustomThemePath' => $custom_theme_path,
+    'jstreeCustomThemeName' => $custom_theme_name,
+    'jstreeThemeSelect'     => $theme_type,
+    'jstreeScriptThemes'    => $script_themes,
+    'jstreeCustomScript'    => $custom_script,
+    'jstreeLibraryPath'    => $path,
+  ), 'setting');
+
+
+}
+
+/**
+ * implementation of hook_menu()
+ */
+
+function jstree_menu() {
+  $items = array();
+
+  $items['admin/config/user-interface/jstree'] = array(
+    'title'            => 'Jstree',
+    'description'      => 'Configure jstree',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('jstree_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file'             => 'jstree.admin.inc',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Preprocessor for menu_link.
+ * Adds the required HTML attributes and loads subtrees if necessary.
+ *
+ * This guarantees that the menus have IDS. jstree needs ids for the cookie plugin to work.
+ */
+
+function jstree_preprocess_menu_link(&$variables) {
+
+  $chosen_menus = variable_get('jstree_id_list', array());
+  // Saves a lot of code.
+  $l = &$variables['element']['#original_link'];
+
+  //menu has name and has mlid
+  if (empty($l['menu_name']) || empty($l['mlid'])) {
+    return;
+  }
+
+  //run add ID only on selected menus
+  if (!empty($chosen_menus[$l['menu_name']])) {
+    // Add the ID and class attributes.
+
+    //only set ID if there is none
+    if (!isset($variables['element']['#attributes']['id'])) {
+      $variables['element']['#attributes']['id'] = 'menu-drupal-jstree' . _jstree_menu_unique_id($l['mlid']);
+    }
+    $variables['element']['#attributes']['class'][] = 'drupal-jstree';
+  }
+}
+
+
+/**
+ * Keeps track of ID attributes and adds a suffix to make it unique-when necessary.
+ * inspired by dhtml_menu
+ */
+function _jstree_menu_unique_id($id) {
+  static $ids = array();
+  if (!isset($ids[$id])) {
+    $ids[$id] = 1;
+    return $id;
+  }
+  else {
+    return $id . '-' . $ids[$id]++;
+  }
+}

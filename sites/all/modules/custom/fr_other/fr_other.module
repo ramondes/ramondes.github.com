@@ -1,0 +1,340 @@
+<?php
+
+function fr_other_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['sort_by'])) {
+    // Combine sort drop-downs into one.
+    $form['sorting'] = array(
+      '#type'  => 'select',
+      '#id'    => 'sort',
+      '#title' => $form['sort_by']['#title'],
+    );
+    foreach ($form['sort_by']['#options'] as $sort_by_key => $sort_by_title) {
+      foreach ($form['sort_order']['#options'] as $sort_order_key => $sort_order_title) {
+        $form['sorting']['#options'][$sort_by_key . '|' . $sort_order_key] = $sort_by_title . ' ' . $sort_order_title;
+      }
+    }
+
+    // Get default value for combined sort.
+    $sort_by_keys = array_keys($form['sort_by']['#options']);
+    $form['sorting']['#default_value'] = $sort_by_keys[0] . '|' . $form['sort_order']['#default_value'];
+  }
+
+  // Explode combined sort field into two values that are appropriate for views.
+  if (isset($form_state['input']['sorting'])) {
+    $sorting = explode('|', $form_state['input']['sorting']);
+    $form_state['input']['sort_by'] = $sorting[0];
+    $form_state['input']['sort_order'] = $sorting[1];
+  }
+}
+
+/**
+ * Default preprocess function for all filter forms.
+ */
+function fr_other_preprocess_views_exposed_form(&$vars) {
+  $form = &$vars['form'];
+  if (isset($form['#id'])) {
+    if ($form['#id'] == 'views-exposed-form-category-filter-block') {
+      foreach ($form['sorting']['#options'] as $key => &$value) {
+        switch ($key) {
+          case 'commerce_price_amount_1|ASC':
+            $value = t('cheap to expensive');
+            break;
+          case 'commerce_price_amount_1|DESC':
+            $value = t('expensive to cheap');
+            break;
+          case 'field_product_popularity_value|DESC':
+            $value = t('popular');
+            break;
+          case 'field_product_popularity_value|ASC':
+            unset($form['sorting']['#options'][$key]);
+            break;
+          case 'title|ASC':
+            $value = t('by name');
+            break;
+          case 'title|DESC':
+            unset($form['sorting']['#options'][$key]);
+            break;
+          case 'created|DESC':
+            $value = t('by last');
+            break;
+          case 'created|ASC':
+            unset($form['sorting']['#options'][$key]);
+            break;
+        }
+      }
+    }
+  }
+
+  // Render new created sort field.
+  if (isset($form['sorting'])) {
+    $form['sorting']['#printed'] = FALSE;
+    $vars['sorting'] = drupal_render($form['sorting']);
+
+    // Need to rebuild the submit button.
+    $form['submit']['#printed'] = FALSE;
+    $vars['button'] = drupal_render_children($form);
+  }
+}
+
+function fr_other_preprocess_page(&$variables) {
+  drupal_add_js(drupal_get_path('module', 'fr_other') . '/js/fr_other.js');
+}
+
+ function fr_other_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($form_id, 'commerce_cart_add_to_cart_form_') === 0) {
+
+    //Ajax pay
+    $form['submit']['#ajax'] = array('callback' => 'fr_other_add_to_cart_ajax_callback');
+    $form['#submit'][] = 'fr_other_add_to_cart_form_submit';
+
+    $form['submit']['#value'] = t('Buy');
+    $form['submit']['#attributes']['class'] = array('btn', 'btn-danger');
+    $form['quantity']['#title'] = '';
+
+    if (arg(0) == 'node' && is_numeric(arg(1))) {
+      $node = node_load(arg(1));
+      if ($node->type == 'display') {
+        $form['by_bar'] = array(
+          '#type'   => '#marcup',
+          '#prefix' => '<div class="bay-bar">',
+          '#suffix' => '</div>',
+        );
+        $form['by_bar']['submit'] = $form['submit'];
+        $form['by_bar']['submit']['#weight'] = 2;
+        unset($form['submit']);
+
+        $form['by_bar']['quantity'] = $form['quantity'];
+        $form['by_bar']['quantity']['#weight'] = 1;
+
+        $form['by_bar']['quantity']['#prefix'] = '<div class="quantity-field">';
+        $form['by_bar']['quantity']['#suffix'] = '</div>';
+        unset($form['quantity']);
+
+        $form['by_bar']['link_to_kredit'] = array(
+          '#type'  => 'link',
+          '#title' => 'Гуртовий прайс',
+          '#href'  => 'http://demo.dam.net.ua/kontakty',
+          '#weight' => 3,
+        );
+      }
+    }
+
+  }
+}
+
+/**
+ * "Add to cart" button ajax callback.
+ */
+function fr_other_add_to_cart_ajax_callback($form, &$form_state) {
+  drupal_get_messages();
+  $block = module_invoke('block',  'block_view', 3);
+
+  return array(
+    '#type'     => 'ajax',
+    '#commands' => array(
+       ajax_command_html('#block-block-3', render($block['content'])),
+       ajax_command_invoke(NULL, 'cart_show'),
+    ),
+  );
+}
+ 
+/**
+ * "Add to cart" button submit callback.
+ */
+function fr_other_add_to_cart_form_submit($form, &$form_state){
+  $form_state['rebuild'] = TRUE;
+}
+
+function fr_other_menu() {
+  $items = array();
+  $items['admin/commerce/shop_info'] = array(
+    'title'            => t('Shop info'),
+    'description'      => t('Shop information'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('fr_other_shop_info'),
+    'access arguments' => array('administer nodes'),
+    'type'             => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Get settings form for shop info.
+ */
+function fr_other_shop_info() {
+  $form = array();
+
+  $form['pones'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('Contact phones'),
+    '#collapsible' => TRUE,
+    '#collapsed'   => FALSE,
+  );
+  $form['pones']['kyivstar'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('Phone 1'),
+    '#collapsible' => TRUE,
+    '#collapsed'   => TRUE,
+  );
+  $form['pones']['mts'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('Phone 2'),
+    '#collapsible' => TRUE,
+    '#collapsed'   => TRUE,
+  );
+
+
+  $form['pones']['kyivstar']['phone1_code'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Code'),
+    '#default_value' => variable_get('phone1_code'),
+    '#required'      => TRUE,
+    '#size'          => 5,
+    '#maxlength'     => 5,
+  );
+  $form['pones']['kyivstar']['phone1'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('number'),
+    '#default_value' => variable_get('phone1'),
+    '#required'      => TRUE,
+    '#size'          => 9,
+    '#maxlength'     => 9,
+  );
+
+  $form['pones']['mts']['phone2_code'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Code'),
+    '#default_value' => variable_get('phone2_code'),
+    '#required'      => TRUE,
+    '#size'          => 5,
+    '#maxlength'     => 5,
+  );
+  $form['pones']['mts']['phone2'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('number'),
+    '#default_value' => variable_get('phone2'),
+    '#required'      => TRUE,
+    '#size'          => 9,
+    '#maxlength'     => 9,
+  );
+
+  return system_settings_form($form);
+}
+
+
+/**
+ * Hide text formats on comment form
+ */
+function fr_other_form_comment_form_alter(&$form, &$form_state, &$form_id) {
+  $form['comment_body']['#after_build'][] = 'fr_other_customize_comment_form';
+}
+
+function fr_other_customize_comment_form(&$form) {
+  $form[LANGUAGE_NONE][0]['format']['#access'] = FALSE;
+  return $form;
+}
+
+function fr_other_page_alter(&$page) {
+  if (drupal_is_front_page()) {
+    return TRUE;
+  }
+  elseif (arg(2)) {
+    $term = taxonomy_term_load(arg(2));
+    if (isset($term->vocabulary_machine_name)) {
+      if ($term->vocabulary_machine_name == 'katalog') {
+        return TRUE;
+      }
+    }
+  }
+  elseif (arg(1)) {
+    $noda = node_load(arg(1));
+    if (isset($noda->type)) {
+      if ($noda->type == 'display') {
+        return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+function fr_other_commerce_checkout_complete($order) {
+  if ($order->data['payment_method'] == 'commerce_receipt|commerce_payment_commerce_receipt') {
+    drupal_mail('fr_other', 'sent_receipt', $order->mail, language_default(), array(
+      'order_number' => $order->order_number,
+      'order_id' => $order->order_id,
+    ));
+  }
+}
+
+/**
+ * hook_mail()
+ */
+function fr_other_mail($key, &$message, $params) {
+  if ($key == 'sent_receipt') {
+    $message['headers']['MIME-Version'] = '1.0';
+    $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
+    $message['headers']['Content-Transfer-Encoding'] = '8Bit';
+    $message['headers']['X-Mailer'] = 'Drupal';
+
+    $message['subject'] = t('Receipt for payment by order number @order_number', array('@order_number' => $params['order_number']));
+    $message['body'][] = fr_other_template($params['order_id']);
+  }
+}
+
+function fr_other_template($order_id) {
+  $order = commerce_order_load($order_id);
+  $variables = variable_get('commerce_receipt_settings', '');
+  $filename = $variables['template']['#default_value'];
+  $file = drupal_get_path('module', 'commerce_receipt') . '/templates/UA_mail.tpl.php';
+  if (file_exists($file)) {
+    $output = file_get_contents($file);
+    $output = token_replace($output, $data = array('commerce-receipt' => $order));
+  }
+  else {
+    $output = t('No templates found!');
+  }
+  return $output;
+}
+
+
+
+// function fr_other_js_alter(&$javascript) {
+//   // drupal_set_message('<pre><h5><i><u>Debug:</u></i></h5>'.check_plain(print_r($javascript,1)).'</pre>');
+
+//   // $javascript['misc/jquery.form.js']['weight'] = -30;
+//   // unset($javascript['misc/jquery.once.js']);
+
+//     // unset($javascript['misc/jquery.js']);
+//     // unset($javascript['misc/drupal.js']);
+//     // unset($javascript['sites/all/themes/sultan/plugins/treeview/lib/jquery.js']);
+//     // unset($javascript['settings']);
+//     // unset($javascript['sites/all/themes/sultan/plugins/treeview/jquery.treeview.js']);
+//     // unset($javascript['sites/all/libraries/colorbox/colorbox/jquery.colorbox-min.js']);
+//     // unset($javascript['sites/all/modules/colorbox/js/colorbox.js']);
+//     // unset($javascript['sites/all/modules/colorbox/styles/stockholmsyndrome/colorbox_stockholmsyndrome.js']);
+//     // unset($javascript['sites/all/modules/dhtml_menu/dhtml_menu.js']);
+//     // unset($javascript['sites/all/modules/views_slideshow/js/views_slideshow.js']);
+//     // unset($javascript['sites/all/modules/views/js/base.js']);
+//     // unset($javascript['misc/progress.js']);
+//     // unset($javascript['misc/jquery.cookie.js']);
+//     // unset($javascript['misc/jquery.form.js']);
+//     // unset($javascript['sites/all/modules/ctools/js/auto-submit.js']);
+//     // unset($javascript['sites/all/modules/views/js/ajax_view.js']);
+//     // unset($javascript['sites/all/modules/commerce_product_urls/commerce_product_urls.js']);
+//     // unset($javascript['sites/all/modules/custom/fr_other/js/fr_other.js']);
+//     // unset($javascript['modules/contextual/contextual.js']);
+//     // unset($javascript['sites/all/modules/admin_menu/admin_menu.js']);
+//     // unset($javascript['sites/all/modules/admin_menu/admin_menu_toolbar/admin_menu_toolbar.js']);
+//     // unset($javascript['misc/ajax.js']);
+//     // unset($javascript['misc/jquery.once.js']);
+
+//   $a = array();
+//   foreach ($javascript as $key => $value) {
+//     $a[$key] = $value['weight'];
+//   }
+//   asort($a);
+//   // drupal_set_message('<pre><h5><i><u>Debug:</u></i></h5>'.check_plain(print_r($a,1)).'</pre>');
+
+//   // $javascript['misc/jquery.js']['data'] = drupal_get_path('module', 'jquery_update') . '/jquery.js'; // Swap out jQuery to use an updated version of the library
+// }

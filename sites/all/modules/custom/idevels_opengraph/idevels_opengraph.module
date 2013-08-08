@@ -1,0 +1,104 @@
+<?php
+/**
+ * @file
+ * Added to head oepengraph tags.
+ */
+
+/**
+ * Preprocess function for page.tpl.php.
+ */
+function idevels_opengraph_preprocess_page(&$vars) {
+  $nid = (arg(0) == 'node' && is_numeric(arg(1))) ? arg(1) : NULL;
+  if (!$nid) {
+    return;
+  }
+
+  $node = node_load($nid);
+
+  $goods_meta = array();
+
+  // Facebook.
+  $goods_meta[] = array(
+    'property' => 'fb:app_id',
+    'content'  => '572565422777081',
+  );
+  $goods_meta[] = array(
+    'property' => 'og:type',
+    'content'  => 'product',
+  );
+  $goods_meta[] = array(
+    'property' => 'og:site_name',
+    'content'  => variable_get('site_name', "Default site name"),
+  );
+  $goods_meta[] = array(
+    'property' => 'og:title',
+    'content'  => $node->title,
+  );
+  $goods_meta[] = array(
+    'property' => 'og:url',
+    'content'  => url('node/' . $nid, array('absolute' => TRUE)),
+  );
+  $goods_meta[] = array(
+    'property' => 'og:image',
+    'content'  => file_create_url(idevels_opengraph_get_image_uri($nid)),
+  );
+
+  // Twitter.
+  $goods_meta[] = array(
+    'name'    => 'twitter:card',
+    'content' => 'photo',
+  );
+  $goods_meta[] = array(
+    'name'    => 'twitter:site',
+    'content' => variable_get('site_name', "Default site name"),
+  );
+  $goods_meta[] = array(
+    'name'    => 'twitter:url',
+    'content' => url('node/' . $nid, array('absolute' => TRUE)),
+  );
+  $goods_meta[] = array(
+    'name'    => 'twitter:title',
+    'content' => $node->title,
+  );
+  $goods_meta[] = array(
+    'name'    => 'twitter:image',
+    'content' => file_create_url(idevels_opengraph_get_image_uri($nid)),
+  );
+
+  $goods_opengraph = array();
+  foreach ($goods_meta as $value) {
+    $goods_opengraph[] = array(
+      '#type' => 'html_tag',
+      '#tag'  => 'meta',
+      '#attributes' => $value,
+    );
+  }
+
+  foreach ($goods_opengraph as $key => $value) {
+    drupal_add_html_head($value, $key);
+  }
+}
+
+/**
+ * Get product image of node nid.
+ *
+ * @param int $nid
+ *   Product display nid.
+ *
+ * @return string
+ *   File URI.
+ */
+function idevels_opengraph_get_image_uri($nid) {
+  $result = db_select('field_data_field_product_ref', 't_ref');
+  $result->join('field_data_field_product_photos', 't_pim', 't_ref.field_product_ref_product_id = t_pim.entity_id');
+  $result->join('file_managed', 't_fm', 't_pim.field_product_photos_fid = t_fm.fid');
+  $result->fields('t_fm', array('uri'))
+    ->condition('t_ref.entity_id', $nid);
+  $result = $result->execute();
+  $result = $result->fetchCol();
+
+  if ($result) {
+    return reset($result);
+  }
+  return 0;
+}

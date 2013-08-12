@@ -1,5 +1,0 @@
-name = IP Geo
-description = Определение региона пользователя по его IP адресу.
-core = 7.x
-version = 7.x-1.x
-configure = admin/config/development/ipgeo

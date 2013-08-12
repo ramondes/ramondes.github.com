@@ -1,7 +1,0 @@
-; $Id$
-name = idevels_opengraph
-description = Add mete tags to head
-package = "Idevels"
-core = 7.x
-version = "7.x-1.0-dev"
-files[]= idevels_opengraph.module

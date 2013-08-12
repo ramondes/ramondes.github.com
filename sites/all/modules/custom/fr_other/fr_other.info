@@ -1,7 +1,0 @@
-;$Id$
-name = fr_other
-description = Other functionaly
-package = Frajj
-core = 7.x
-
-files[] = fr_other.module
